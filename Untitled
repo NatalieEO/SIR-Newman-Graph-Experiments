@@ -1,0 +1,471 @@
+void writeGraph::bipartite(const char *fname){
+  ofstream myfile(fname);
+  bipDeg = groupSize/2;
+  remBipDeg = groupSize - bipDeg;
+  group = new int[groupSize];
+  int numberOfGroups = numNodes / groupSize;  //Gets truncated if the number of nodes doesn't divide evenly by the chosen group size
+  int iterations = numberOfGroups * groupSize;
+  
+  if(myfile.is_open()){
+    myfile << numNodes << '\n';
+    
+    for(int i = 0; i < iterations; i++){
+      //At start of new group, reset group array.
+      if(i % groupSize == 0){
+        int temp = i;
+        for(int j = 0; j < groupSize; j++){
+          group[j] = temp;
+          temp++;
+        }
+      }
+    
+      //Within in a group, connect each node of first half to each node of second half
+      if(i % groupSize < bipDeg){
+        myfile << i << ' ' << remBipDeg << '\n';
+        for(int j = bipDeg; j < groupSize; j++){
+          myfile << '\t' <<  group[j] << " 0 " << "0 " << '\n'; 
+        } 
+      }
+      //Within in a group, connect each node of second half to each node of first half
+      else {
+        myfile << i << ' ' << bipDeg << '\n';
+        for(int j = 0; j < bipDeg; j++){
+          myfile << '\t' <<  group[j] << " 0 " << "0 " << '\n'; 
+        } 
+      }
+    }
+    
+    //If the last group is smaller, this will connect the nodes within the last group
+    if(iterations != numNodes){
+      int size = numNodes - iterations;
+      int *lastGroup = new int[size];
+      lastBipDeg = size / 2;
+      lastRemBipDeg = size - lastBipDeg;
+      
+      //only 1 node left. 
+      if (size == 0){
+        myfile << iterations << ' ' << 0 << '\n';
+      }
+      
+      //More than 1 node left, then set array and connect the nodes within the group
+      else {
+        int temp = iterations;
+        for(int i = 0; i < size; i++){
+          lastGroup[i] = temp;
+          temp++;
+        }
+        
+        for(int i = 0; i < size; i++){
+          if(i < lastBipDeg){
+            myfile << lastGroup[i] << ' ' << lastRemBipDeg << '\n';
+            for(int j = lastBipDeg; j < size; j++){
+              myfile << '\t' <<  lastGroup[j] << " 0 " << "0 " << '\n'; 
+            }
+          }
+          
+          else {
+            myfile << lastGroup[i] << ' ' << lastBipDeg << '\n';
+            for(int j = 0; j < lastBipDeg; j++){
+              myfile << '\t' <<  lastGroup[j] << " 0 " << "0 " << '\n'; 
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+
+void writeGraph::joinGroups(const char *fname){
+  ofstream myfile("tempGraph.gph");
+  ifstream ifp(fname);
+  float qi = averageNodeDegree - (groupSize / 2.0);
+  int range = qi*2;
+  bool *prevConnected = new bool [numNodes];
+  int randomNode;
+  srand(time(NULL));
+  
+  
+  int n, u, degree, v, wt, temp;
+  if(myfile.is_open() && ifp.is_open()){
+    ifp >> n;
+    myfile << n << '\n';
+    
+    //Copy the file into the temporary graph.
+    for(int i = 0; i < numNodes; i++){
+      ifp >> u >> degree;
+      myfile << u << " " << degree << '\n';
+      
+      for(int j = 0; j < degree; j++){
+        ifp >> v >> wt >> temp;
+        myfile << '\t' << v << " " << wt << " " << temp << " " << '\n';
+      }
+      
+      //Add new edges between different groups
+      int random = rand() % (range + 1);
+
+      if(random != 0){
+        //Set all nodes in the graph to false.
+        for(int j = 0; j < numNodes; j++){
+          prevConnected[j] = false;
+        }
+        
+        //Node cannot connect with itself.
+        prevConnected[i] = true;
+        for(int k = 0; k < random; k++){
+          randomNode = rand() % numNodes;
+          //If there is already a connection, generate another random node ID
+          while(prevConnected[randomNode] == true){
+            randomNode = rand() % numNodes;
+          }
+          prevConnected[randomNode] = true;
+      
+         myfile << '\t' << randomNode << " " << "0 0 " << '\n';
+        }
+      }
+    }
+  }
+}
+
+
+
+void Graph::createGraph(Vsize numberNodes, int gSize, int avgNodeDegree){
+	
+	n = numberNodes;
+	nlist = new Set[n];
+	name = new ULI[n];
+
+	//bipartite(numberNodes, gSize, avgNodeDegree);
+	
+	int bipDeg = gSize/2;
+	int remBipDeg = gSize - bipDeg;
+	int group[gSize];
+	int numberOfGroups = n / gSize;
+	int iterations = numberOfGroups * gSize;
+	
+	float qi = avgNodeDegree - (gSize / 2.0);
+	cout << qi << '\n';
+	int range = qi*2;
+	cout << range << '\n';
+	int addNodes[n];
+	int neighborIndex[n];		//Keeps track of the index for insertion into the neighborlist set
+	bool prevConnected[n];
+	int bipNodes[n];
+	int random;         		//number of random edges to add to each node;
+	int randomNode;     		//The node to add.
+	srand(time(NULL));
+	
+	
+	//Set up the random number of edges each vertex will receive, and also the number of edges to add for a bipartite group
+	for(int i = 0; i <iterations; i++){
+		//Determine the random number of edges to add to each node.
+		random = rand() % (range + 1);
+    	addNodes[i] = random;
+    	name[i] = i;
+    	
+    	if(i % gSize < bipDeg){
+    		//Each node in first half will have has many edges as there are nodes in the second half
+    		bipNodes[i] = remBipDeg;
+    		nlist[i].init(bipNodes[i] + addNodes[i]);
+    		
+    	}
+    	else{
+    		//reverse
+    		bipNodes[i] = bipDeg;
+    		nlist[i].init(bipNodes[i] + addNodes[i]);
+    	}
+    	cout << "index " << i << " bip: " << bipNodes[i] << " numRanEdges: " << addNodes[i] << '\n';
+    	neighborIndex[i] = 0;
+	}
+	
+
+	for(int i = 0; i < iterations; i++){
+    	//At start of new group, reset group array which contains the node ID.
+		if(i % gSize == 0){
+			int temp = i;
+			for(int j = 0; j < gSize; j++){
+				group[j] = temp;
+				temp++;
+			}
+		}
+		
+		
+		//Connect each node in first half to each node in second half. Vice versa.
+		if(i % gSize < bipDeg){
+			//Bipartite
+			for(int j = bipDeg; j < gSize; j++){
+				nlist[i].insert(group[j]);
+
+				//nlist[i][neighborIndex[i]] = group[j];
+				neighborIndex[i] = neighborIndex[i] + 1;
+				
+				//Connect node in second half to node from first half.
+				int nodeID = group[j];
+				nlist[nodeID].insert(i);
+				//nlist[nodeID][neighborIndex[nodeID]] = i;
+				neighborIndex[nodeID] = neighborIndex[nodeID] + 1;
+			}
+		}
+
+		//Add random edge connections.
+		if(addNodes[i] != 0){
+			//Set all nodes in the graph to false
+			for(int j = 0; j < n; j++){
+				prevConnected[j] = false;
+			}
+			
+			//Node cannot connect with itself
+			prevConnected[i] = true;
+			
+			//Node cannot connect within its group again
+			for(int j = 0; j < gSize; j++){
+				prevConnected[group[j]] = false;
+			}
+			
+			for(int j = nlist[i].Size(); j < addNodes[i] + bipNodes[i]; j++){
+				randomNode = rand() % n;
+				//Keep generating a random node to attach to if it's been connected previously 
+				while(prevConnected[randomNode] == true || nlist[randomNode].Size() == bipNodes[randomNode] + addNodes[randomNode] ){
+					randomNode = rand() % n;
+					//cout << "try again " << i << " "<< randomNode << '\n';
+				}
+				prevConnected[randomNode] = true;
+				//cout << j << " less than " << addNodes[i] + bipNodes[i] << " " << randomNode <<'\n';
+				
+			// 	prevConnected[randomNode] = true;
+				nlist[i].insert(randomNode);
+				//cout << nlist[i][j-1] << '\n';
+				nlist[randomNode].insert(i);
+			// 	//nlist[i][neighborIndex[i]] = randomNode;
+			// 	//nlist[randomNode][neighborIndex[randomNode]] = i;
+			// 	neighborIndex[i] = neighborIndex[i] + 1;
+			// 	neighborIndex[randomNode] = neighborIndex[randomNode] + 1;
+			}
+		}
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+void Graph::createGraph(Vsize numberNodes, int gSize, int avgNodeDegree){
+	
+	n = numberNodes;
+	nlist = new Set[n];
+	name = new ULI[n];
+
+	//bipartite(numberNodes, gSize, avgNodeDegree);
+	
+	int bipDeg = gSize/2;
+	int remBipDeg = gSize - bipDeg;
+	int group[gSize];
+	int numberOfGroups = n / gSize;
+	int iterations = numberOfGroups * gSize;
+	
+	float qi = avgNodeDegree - (gSize / 2.0);
+	cout << qi << '\n';
+	int range = qi*2;
+	cout << range << '\n';
+	int addNodes[n];
+	int neighborIndex[n];		//Keeps track of the index for insertion into the neighborlist set
+	bool prevConnected[n];
+	int bipNodes[n];
+	int random;         		//number of random edges to add to each node;
+	int randomNode;     		//The node to add.
+	srand(time(NULL));
+	
+	
+	//Set up the random number of edges each vertex will receive, and also the number of edges to add for a bipartite group
+	for(int i = 0; i <iterations; i++){
+		//Determine the random number of edges to add to each node.
+		random = rand() % (range + 1);
+    	addNodes[i] = random;
+    	name[i] = i;
+    	
+    	if(i % gSize < bipDeg){
+    		//Each node in first half will have has many edges as there are nodes in the second half
+    		bipNodes[i] = remBipDeg;
+    		nlist[i].init(bipNodes[i] + addNodes[i]);
+    		
+    	}
+    	else{
+    		//reverse
+    		bipNodes[i] = bipDeg;
+    		nlist[i].init(bipNodes[i] + addNodes[i]);
+    	}
+    	cout << "index " << i << " bip: " << bipNodes[i] << " numRanEdges: " << addNodes[i] << '\n';
+    	neighborIndex[i] = 0;
+	}
+	
+	//Bipartite portion
+	for(int i = 0; i < iterations; i++){
+    	//At start of new group, reset group array which contains the node ID.
+		if(i % gSize == 0){
+			int temp = i;
+			for(int j = 0; j < gSize; j++){
+				group[j] = temp;
+				temp++;
+			}
+		}
+		
+		//Connect each node in first half to each node in second half. Vice versa.
+		if(i % gSize < bipDeg){
+			//Bipartite
+			for(int j = bipDeg; j < gSize; j++){
+				nlist[i].insert(group[j]);
+
+				//nlist[i][neighborIndex[i]] = group[j];
+				neighborIndex[i] = neighborIndex[i] + 1;
+				
+				//Connect node in second half to node from first half.
+				int nodeID = group[j];
+				nlist[nodeID].insert(i);
+				//nlist[nodeID][neighborIndex[nodeID]] = i;
+				neighborIndex[nodeID] = neighborIndex[nodeID] + 1;
+			}
+		}
+	}
+	
+	//Add random edges
+	for(int i = 0; i < iterations; i++){
+		//At start of new group, reset group array which contains the node ID.
+		if(i % gSize == 0){
+			int temp = i;
+			for(int j = 0; j < gSize; j++){
+				group[j] = temp;
+				temp++;
+			}
+		}
+		//Add random edge connections.
+		if(addNodes[i] != 0){
+			//Set all nodes in the graph to false
+			for(int j = 0; j < n; j++){
+				prevConnected[j] = false;
+			}
+			
+			//Node cannot connect with itself
+			prevConnected[i] = true;
+			
+			//Node cannot connect within its group again
+			for(int j = 0; j < gSize; j++){
+				prevConnected[group[j]] = false;
+			}
+			
+			for(int j = nlist[i].Size(); j < addNodes[i] + bipNodes[i]; j++){
+				randomNode = rand() % n;
+				//Keep generating a random node to attach to if it's been connected previously 
+				while(prevConnected[randomNode] == true || nlist[randomNode].Size() == bipNodes[randomNode] + addNodes[randomNode] ){
+					randomNode = rand() % n;
+					//cout << "try again " << i << " "<< randomNode << '\n';
+				}
+				prevConnected[randomNode] = true;
+				//cout << j << " less than " << addNodes[i] + bipNodes[i] << " " << randomNode <<'\n';
+				
+			// 	prevConnected[randomNode] = true;
+				nlist[i].insert(randomNode);
+				//cout << nlist[i][j-1] << '\n';
+				nlist[randomNode].insert(i);
+			// 	//nlist[i][neighborIndex[i]] = randomNode;
+			// 	//nlist[randomNode][neighborIndex[randomNode]] = i;
+			// 	neighborIndex[i] = neighborIndex[i] + 1;
+			// 	neighborIndex[randomNode] = neighborIndex[randomNode] + 1;
+			}
+		}
+	}
+}
+
+
+
+	float sum = 0;
+	for(int i = 0; i < n; i++){
+		sum = sum + nlist[i].Size();
+	}
+	float avg = sum / 1000.0;
+	cout << avg << '\n';
+	
+	
+	
+void Graph::createGraph(Vsize numberNodes, int gSize, int avgNodeDegree){
+	
+	n = numberNodes;
+	nlist = new Set[n];
+	name = new ULI[n];
+	
+	int bipDeg = gSize/2;
+	int remBipDeg = gSize - bipDeg;
+	int group[gSize];
+	int numberOfGroups = n / gSize;
+	int iterations = numberOfGroups * gSize;
+	int setSize = gSize * 2;
+	float qi = avgNodeDegree - (gSize / 2.0);
+	int range = qi*2;
+	int half = qi / 2;
+	bool prevConnected[n];
+	int randomNode;     		//The node to add.
+	srand(time(NULL));
+	
+	//Set up the size of all the neighbor lists
+	for(int i = 0; i < n; i++){
+    	name[i] = i;
+    	nlist[i].init(setSize);
+	}
+	
+	for(int i = 0; i < iterations; i++){
+    	//At start of new group, reset group array which contains the node ID.
+		if(i % gSize == 0){
+			int temp = i;
+			for(int j = 0; j < gSize; j++){
+				group[j] = temp;
+				temp++;
+			}
+		}
+		
+		bipartite(group, gSize, bipDeg, i);
+		randomEdges(prevConnected, group, half, gSize, i);
+		//Add random edge connections.
+		//Set all nodes in the graph to false
+		// for(int j = 0; j < n; j++){
+		// 	prevConnected[j] = false;
+		// }
+		
+		// //Node cannot connect with itself
+		// prevConnected[i] = true;
+		
+		// //Node cannot connect within its group again
+		// for(int j = 0; j < gSize; j++){
+		// 	prevConnected[group[j]] = true;
+		// }
+		
+		// for(int j = 0; j < half; j++){
+		// 	randomNode = rand() % n;
+		// 	//Keep generating a random node to attach to if it's been connected previously 
+		// 	while(prevConnected[randomNode] == true){
+		// 		randomNode = rand() % n;
+		// 	}
+		// 	//Insert edge between the current node and random node selected
+		// 	prevConnected[randomNode] = true;
+		// 	nlist[i].Dinsert(randomNode);
+		// 	nlist[randomNode].Dinsert(i);
+		// }
+	}
+	
+	// if(iterations != n){
+	// 	int size = n - iterations;
+	// 	int lastGroup[size];
+	// 	int lastBipDeg = size / 2;
+		
+	// 	if(size > 1){
+			
+	// 	}
+	// }
+}
