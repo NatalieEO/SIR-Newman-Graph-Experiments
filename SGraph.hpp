@@ -840,7 +840,7 @@ void Graph::createGraph(Vsize numberNodes, int gSize, int avgNodeDegree){
 
 
 // Create triangle-free graph (groups) with desired avg degree and in-degree for each node. 
-void Graph::TriangleFreeGraph(Vsize numberNodes, int gSize, int inDeg, int avgNodeDegree){
+void Graph::TriangleFreeGraph(Vsize numberNodes, int gSize, int inDeg, int avgNodeDegree) {
 	
 	if (inDeg > (gSize / 2.0)){
 		cout << "In degree cannot be greater than half the group size\n";
@@ -944,7 +944,7 @@ void Graph::TriangleFreeGraph(Vsize numberNodes, int gSize, int inDeg, int avgNo
 
 
 // Create Newman style graph
-void Graph::Newman(Vertex numNodes, int avgDeg, double cluster, int groupSize){
+void Graph::Newman(Vertex numNodes, int avgDeg, double cluster, int groupSize) {
 	
 	long int numEdges = numNodes * avgDeg / 2;		// Number of edges needed to form graph with avgDeg
 	long int actualNumEdges = 0;					// Counter for the number of edges formed so far
@@ -1001,7 +1001,7 @@ void Graph::Newman(Vertex numNodes, int avgDeg, double cluster, int groupSize){
 
 
 // Creates a triangle-free Newman graph by splitting group in half and adding edges in bipartite manner.
-void Graph::BipNewman(Vertex numNodes, int avgDeg, double cluster, int groupSize){
+void Graph::BipNewman(Vertex numNodes, int avgDeg, double cluster, int groupSize) {
 	
 	long int numEdges = numNodes * avgDeg / 2;
 	long int actualNumEdges = 0;
