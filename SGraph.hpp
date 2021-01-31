@@ -458,7 +458,7 @@ long int Graph::giantComponent(){
 
 
 // SIR simulation. Nodes will stay infectious for only 1 day.
-long int Graph::SIR(Vertex Seed[], int size, int p){
+long int Graph::SIR(Vertex Seed[], int size, int p) {
 	int infectionDay[n];
 	long int numInfected = size;
 	int random;
