@@ -1,10 +1,10 @@
-## Summary
+# Summary
 This project explores the effect of triangle forming relationships vs clustering in graphs. 
 
-### Sgraph.hpp
+## Sgraph.hpp
 This file defines the Graph class and contains a variety of functions to create different types of graphs, save them to a text file, and run SIR/SIR-like experiments on said graph.
 
-#### Create a graph functions
+### Create a graph functions
 
 - void Graph::createGraph(Vsize numberNodes, int gSize, int avgNodeDegree)
     - Not a good function name or function...
@@ -28,4 +28,11 @@ This file defines the Graph class and contains a variety of functions to create 
 - void Graph::BipNewman(Vertex numNodes, int avgDeg, double cluster, int groupSize)
     - Creates a triangle-free Newman graph by splitting groups in half and adding edges in bipartite manner.
     
-#### Run experiment on graph functions
+### Run experiment on graph functions
+- Giant component approach
+    - void formGiantComponent(Graph &g, int p)
+        - With input graph g, create another graph by going through each edge and with probability p (out of 10,000), keep an edge.
+    - long int Graph::giantComponent()
+        - Once giant component has been formed, call giantComponent() to return the size of the largest component found within the graph.
+        
+- SIR approach
