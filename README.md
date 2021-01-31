@@ -43,7 +43,7 @@ This file defines the Graph class and contains a variety of functions to create 
     - long int Graph::SIRv2(Vertex Seed[], int size, int chance)
         - Same as SIR, but nodes will stay infectious for multiple days. Number of days infected varies for each node.
         
-### How to run trials
+## How to run trials
 Note that graph files have .gph extension and trial results are csv files
 1. Create and record a graph using one of the following files:
     - genNewmanGraph.cpp
