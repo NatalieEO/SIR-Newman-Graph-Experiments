@@ -17,16 +17,41 @@ This file defines the Graph class and contains a variety of functions to create 
 - void Graph::TriangleFreeGraph(Vsize numberNodes, int gSize, int inDeg, int avgNodeDegree) {
     - Similar to createGraph but only creates triangle-free graphs and the number of edges within the group is controlled by inDeg.
     - Because a triangle-free graph is achieved in a bipartite manner, the inDeg can't be greater than half the group size.
+    - Graph is formed by:
+            - Creates a graph with number of nodes n.
+            - Divides nodes into groups of size gSize.
+            - Each group is divided in half. A node in one half will attempt to form an edge to each node in the second half to reach desired inDeg
+            - Once all nodes reach desired inDeg, form edges randomly to nodes outside of group to get desired avgNodeDegree. 
     
 - void TriangleFreeGraph(Vsize numberNodes, int gSize, int inDeg, int avgNodeDegree, int lastEdgeOut)
     - Similiar to TriangleFreeGraph, but only for when one edge is going out of the group per node. ie AvgNodeDegree = inDeg + 1 
     - Last input 'lastEdgeOut' is the probability, out of 10000, that the node's 1 edge going out the group will form
+     - Graph is formed by in same manner as above, but a node will only attempt to form an edge outside of the group once with probability p.
+    
+- void Graph::createTriGraph(Vsize numberNodes, int gSize, int avgInDegree, int avgNodeDegree)
+    - Creates a graph with triangles subdivided into groups.
+    - avgInDegree should be lower than the average node degree
+    - Graph is formed by:
+        - Creates a graph with number of nodes n.
+        - Divides nodes into groups of size gSize.
+        - Within a group, each node will attempt to form an edge with another node in the same group to reach avgInDegree.
+        - Once all nodes reach desired avgInDegree, form edges randomly to nodes outside of group to get desired avgNodeDegree. 
+
+- void Graph::createTriGraph(Vsize numberNodes, int gSize, int avgInDegree, int avgNodeDegree, int lastEdgeOut)
+    - Similar to createTriGraph, but but only for when one edge is going out of the group per node. ie AvgNodeDegree = inDeg + 1
+    - Last input 'lastEdgeOut' is the probability, out of 10000, that the node's 1 edge going out the group will form
+    - Graph is formed in same manner as above, but a node will only attempt to form an edge outside of the group once with probability p.
     
 - void Graph::Newman(Vertex numNodes, int avgDeg, double cluster, int groupSize)
-    - Creates Newman style graph
+    - Creates Newman style graph:
+        - Repeatedly create different groups of size groupSize with randomly chosen nodes.
+        - Attempt to join attempt to join an edge with probability p between each node within group once
+            - Probability p calculated using clustering coefficient cluster, average node degree avgDeg, and group size groupSize.
+        - Keep forming groups and adding edges until needed number of edges to have average node degree of avgDeg is reached.
     
 - void Graph::BipNewman(Vertex numNodes, int avgDeg, double cluster, int groupSize)
-    - Creates a triangle-free Newman graph by splitting groups in half and adding edges in bipartite manner.
+    - Creates a triangle-free Newman graph using method described above. However, now each group is splity in half and edges are added in bipartite manner.
+        - The probability p that each node can only connect with nodes in other half of group is almost double than that of p in regular Newman graph.
     
 ### Run experiment on graph
 - Giant component approach
