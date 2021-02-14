@@ -34,7 +34,7 @@ This file defines the Graph class and contains a variety of functions to create 
     - Graph is formed by:
         - Creates a graph with number of nodes n.
         - Divides nodes into groups of size gSize.
-        - Within a group, each node will attempt to form an edge with another node in the same group to reach avgInDegree.
+        - Within a group, each node will attempt to form an edge, with probability p (calculated), with another node in the same group to reach avgInDegree.
         - Once all nodes reach desired avgInDegree, form edges randomly to nodes outside of group to get desired avgNodeDegree. 
 
 - void Graph::createTriGraph(Vsize numberNodes, int gSize, int avgInDegree, int avgNodeDegree, int lastEdgeOut)
@@ -72,22 +72,42 @@ This file defines the Graph class and contains a variety of functions to create 
 Note that graph files have .gph extension and trial results are csv files
 1. Create and record a graph using one of the following files:
     - genNewmanGraph.cpp
-        - Command line arguments: [file path to store graph file to, size of graph, average degree of node, clustering coefficient (double), group size]
+        - Command line arguments: [file path to store graph file to (.gph), size of graph, average degree of node, clustering coefficient (double), group size]
     - genBipNewmanGraph.cpp
         - Command line arguments: [file path to store graph file to, size of graph, average degree of node, clustering coefficient (double), group size]
     - genTriangleFreeGraph.cpp
         - Command line arguments: [file path to store graph file to, size of graph, group size, average degree of node within its group, overall average degree of node]
     - genTriangleGraph.cpp
         - Command line arguments: [file path to store graph file to, size of graph, group size, average degree of node within its group, overall average degree of node]
-2. Using recorded graph created from step one, use one of the following files to run several trials and save results.
+2. Using recorded graph created from step one, use one of the following files to run several trials and save results. Check 1milData description below to see naming format of .csv files
     - runSIRexp.cpp
-        - Command line arguments: [file path to graph, file path to save trial results to, group size, average degree of nodes in graph]
+        - Command line arguments: [file path to graph, file path to save trial results to (.csv), group size, average degree of nodes in graph]
         - This was typically ran on a graph with 1 million nodes
         - Runs SIR experiment with infection rates between 100/10000 and 10000/10000, incrementing by 100
         - Each infection rate will be attempted until there are 30 successful runs or until 1000 attempts have been made. Which ever comes first
             - A successful run is when the number of infected nodes is greater than 1000 at the end of the experiment
     - runGiantComponentExp.cpp
-        - Command line arguments: [file path to graph, file path to save trial results to, group size, average degree of nodes in graph]
+        - Command line arguments: [file path to graph, file path to save trial results to (.csv), group size, average degree of nodes in graph]
         - This was typically ran on a graph with 1 million nodes
         - Runs giant component experiments with the probability of keeping an edge between 100/10000 and 10000/10000, incrementing by 100
         - Each probability is done 10 times
+        
+    - The .csv files created from the 2 files above follow
+        
+### Data
+The data generated is kept in the "Trial Data" folder. 
+- 1milData 
+    - This folder contains all the .csv files generated from the SIR or giant component experiments.
+    - Sub folders say size of the graph, number of seeds, and if seeds stay in infectious for multiple days
+    - The csv files follow a similar naming format. 
+        - Type of graph
+        - 1SIR30 -> 1(seed), 30(trials) per infection rate
+        - Size of graph
+        - GS10 -> Group size = 10
+        - AD5 -> Average Degree of a node = 5 
+        - OR AD26-15 -> Average degree of a node = 26 but average degree of a node to other nodes within same group = 15
+        - C02 -> For Newman style graphs only, Cluster coefficient = 0.2
+        
+- Big Graph Experiments
+    - Contains all the jupyter notebooks created so far.
+

@@ -1,0 +1,4 @@
+SIR30 indicates running SIR code until 30 trials create at least 30 people infected OR there have been 1000 attempts to do so. Trials
+that do not reach at least 30 are NOT recorded
+
+SIRall indicates running SIR and taking all results that come from it. All results are recorded.

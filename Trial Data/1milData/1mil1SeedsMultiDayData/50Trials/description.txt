@@ -1,0 +1,2 @@
+Run SIR 50 times for each infection rate p. Take all 50 trials as is. This data will later be cleaned for actual outliers
+on a per p value basis.
