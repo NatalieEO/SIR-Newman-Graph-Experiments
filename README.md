@@ -1,6 +1,12 @@
 # Summary
 This project explores the effect of triangle forming relationships vs clustering in graphs. 
 
+# Setup
+To run the Jupyter Notebooks, this is confirmed working with Python 3.7.0 and pip 10.0.1. You will need to install:
+- pip install pandas
+- pip install matplotlib
+- pip install plotly==3.10.0
+
 ## Sgraph.hpp
 This file defines the Graph class and contains a variety of functions to create different types of graphs, save them to a text file, and run SIR/SIR-like experiments on said graph.
 
