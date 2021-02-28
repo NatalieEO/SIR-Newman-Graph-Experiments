@@ -21,7 +21,7 @@ int main(int argc, char** argv){
     int gs = atoi(argv[3]);
     int d = atoi(argv[4]);
     long int numInfected;
-    for(int i = 0; i <= 10000; i = i + 100){
+    for(int i = 1000; i <= 2000; i = i + 100){
         for(int j = 0; j < 10; j++){
  	        Graph g2;
             g2.formGiantComponent(g, i);
